@@ -15,6 +15,8 @@ body {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
 }
 
 h1 {
@@ -53,4 +55,29 @@ h1 {
 
 #toggleFormat:hover {
     background-color: #0056b3;
+}
+
+#historyContainer {
+    margin-top: 20px;
+    text-align: left;
+}
+
+#historyContainer h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+#colorHistory {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.historyItem {
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #ccc;
 }
