@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const lightnessSlider = document.getElementById("lightnessSlider");
 
     let isHex = true;
-    const history = [];
+    const history = JSON.parse(localStorage.getItem('colorHistory')) || [];
 
     function updateDisplay(color) {
         colorDisplay.textContent = isHex ? color.toUpperCase() : hexToRgb(color);
@@ -43,23 +43,34 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function addToHistory(color) {
-        if (history.includes(color)) return;
-        history.push(color);
-        const colorDiv = document.createElement("div");
-        colorDiv.classList.add("history-item");
-        colorDiv.style.backgroundColor = color;
-        colorDiv.addEventListener("click", function() {
-            updateDisplay(color);
-            colorPicker.value = color;
+        if (!history.includes(color)) {
+            history.unshift(color);
+            if (history.length > 20) history.pop();
+            localStorage.setItem('colorHistory', JSON.stringify(history));
+            updateHistoryDisplay();
+        }
+    }
+
+    function updateHistoryDisplay() {
+        colorHistory.innerHTML = '';
+        history.forEach(color => {
+            const colorDiv = document.createElement("div");
+            colorDiv.classList.add("history-item");
+            colorDiv.style.backgroundColor = color;
+            colorDiv.setAttribute("aria-label", `Color: ${color}`);
+            colorDiv.addEventListener("click", () => {
+                updateDisplay(color);
+                colorPicker.value = color;
+            });
+            colorHistory.appendChild(colorDiv);
         });
-        colorHistory.appendChild(colorDiv);
     }
 
     function showNotification(message) {
         notification.textContent = message;
-        notification.style.opacity = "1";
+        notification.classList.add("show");
         setTimeout(() => {
-            notification.style.opacity = "0";
+            notification.classList.remove("show");
         }, 2000);
     }
 
@@ -67,9 +78,9 @@ document.addEventListener("DOMContentLoaded", function() {
         const rgb = hexToRgb(color).match(/\d+/g);
         const hsl = rgbToHsl(rgb[0], rgb[1], rgb[2]);
         colorDetails.innerHTML = `
-            <p>HEX: ${color.toUpperCase()}</p>
-            <p>RGB: ${rgb.join(", ")}</p>
-            <p>HSL: ${hsl[0]}°, ${hsl[1]}%, ${hsl[2]}%</p>
+            <p><strong>HEX:</strong> ${color.toUpperCase()}</p>
+            <p><strong>RGB:</strong> ${rgb.join(", ")}</p>
+            <p><strong>HSL:</strong> ${hsl[0]}°, ${hsl[1]}%, ${hsl[2]}%</p>
         `;
     }
 
@@ -77,10 +88,10 @@ document.addEventListener("DOMContentLoaded", function() {
         const contrastWithWhite = getContrastRatio(color, "#FFFFFF");
         const contrastWithBlack = getContrastRatio(color, "#000000");
         accessibilityInfo.innerHTML = `
-            <p>Contrast ratio with white: ${contrastWithWhite.toFixed(2)}</p>
-            <p>Contrast ratio with black: ${contrastWithBlack.toFixed(2)}</p>
-            <p>WCAG 2.0 AA compliant (large text): ${isWCAGCompliant(contrastWithWhite, "AA", "large") || isWCAGCompliant(contrastWithBlack, "AA", "large")}</p>
-            <p>WCAG 2.0 AA compliant (small text): ${isWCAGCompliant(contrastWithWhite, "AA", "small") || isWCAGCompliant(contrastWithBlack, "AA", "small")}</p>
+            <p><strong>Contrast ratio with white:</strong> ${contrastWithWhite.toFixed(2)}</p>
+            <p><strong>Contrast ratio with black:</strong> ${contrastWithBlack.toFixed(2)}</p>
+            <p><strong>WCAG 2.0 AA compliant (large text):</strong> ${isWCAGCompliant(contrastWithWhite, "AA", "large") || isWCAGCompliant(contrastWithBlack, "AA", "large")}</p>
+            <p><strong>WCAG 2.0 AA compliant (small text):</strong> ${isWCAGCompliant(contrastWithWhite, "AA", "small") || isWCAGCompliant(contrastWithBlack, "AA", "small")}</p>
         `;
     }
 
@@ -110,11 +121,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function rgbToHsl(r, g, b) {
-        r /= 255;
-        g /= 255;
-        b /= 255;
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
+        r /= 255, g /= 255, b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
         let h, s, l = (max + min) / 2;
 
         if (max === min) {
@@ -134,9 +142,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function hslToRgb(h, s, l) {
-        h /= 360;
-        s /= 100;
-        l /= 100;
+        h /= 360, s /= 100, l /= 100;
         let r, g, b;
 
         if (s === 0) {
@@ -213,6 +219,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const colorDiv = document.createElement('div');
             colorDiv.classList.add('palette-color');
             colorDiv.style.backgroundColor = color;
+            colorDiv.setAttribute("aria-label", `Palette color: ${color}`);
             colorDiv.addEventListener('click', () => {
                 updateDisplay(color);
                 colorPicker.value = color;
@@ -221,15 +228,18 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    colorPicker.addEventListener("change", function() {
+    colorPicker.addEventListener("input", function() {
         const color = colorPicker.value;
         updateDisplay(color);
+    });
+
+    colorPicker.addEventListener("change", function() {
+        const color = colorPicker.value;
         addToHistory(color);
     });
 
     toggleFormatBtn.addEventListener("click", function() {
         isHex = !isHex;
-        toggleFormatBtn.textContent = isHex ? "Switch to RGB" : "Switch to HEX";
         updateDisplay(colorPicker.value);
     });
 
@@ -281,7 +291,42 @@ document.addEventListener("DOMContentLoaded", function() {
         displayColorPalette(palette);
     });
 
+    // Keyboard accessibility
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && document.activeElement.classList.contains('palette-color')) {
+            document.activeElement.click();
+        }
+    });
+
     // Initialize with the default color
     updateDisplay(colorPicker.value);
     addToHistory(colorPicker.value);
+    updateHistoryDisplay();
+
+    // Color blindness simulation (optional feature)
+    function simulateColorBlindness(color, type) {
+        // Implement color blindness simulation logic here
+        // This is a placeholder and would require a more complex implementation
+        return color;
+    }
+
+    // Export color palette (optional feature)
+    function exportColorPalette(palette) {
+        const paletteString = palette.join('\n');
+        const blob = new Blob([paletteString], {type: 'text/plain'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'color-palette.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // Add event listener for exporting palette (if you add this feature)
+    // document.getElementById('exportPalette').addEventListener('click', () => {
+    //     const currentPalette = Array.from(paletteDisplay.children).map(div => div.style.backgroundColor);
+    //     exportColorPalette(currentPalette);
+    // });
 });
