@@ -3,18 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Color Picker and Visualizer</title>
+    <title>Advanced Color Picker and Visualizer</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <h1>Color Picker and Visualizer</h1>
-        <input type="color" id="colorPicker" value="#ff0000">
-        <div id="colorDisplay">#FF0000</div>
-        <button id="toggleFormat">Switch to RGB</button>
-        <div id="historyContainer">
-            <h2>Color History</h2>
-            <div id="colorHistory"></div>
+        <h1>Advanced Color Picker and Visualizer</h1>
+        <div class="main-content">
+            <div class="color-picker-container">
+                <input type="color" id="colorPicker" value="#ff0000">
+                <div id="colorDisplay">#FF0000</div>
+            </div>
+            <div class="controls">
+                <button id="toggleFormat">Switch to RGB</button>
+                <button id="copyColor">Copy Color</button>
+                <button id="randomColor">Random Color</button>
+            </div>
+            <div class="color-info">
+                <h2>Color Information</h2>
+                <div id="colorDetails"></div>
+                <div id="accessibilityInfo"></div>
+            </div>
+            <div class="color-palettes">
+                <h2>Color Palettes</h2>
+                <div class="palette-types">
+                    <button id="analogousPalette">Analogous</button>
+                    <button id="complementaryPalette">Complementary</button>
+                    <button id="triadicPalette">Triadic</button>
+                    <button id="tetradicPalette">Tetradic</button>
+                </div>
+                <div id="paletteDisplay"></div>
+            </div>
+            <div id="historyContainer">
+                <h2>Color History</h2>
+                <div id="colorHistory"></div>
+            </div>
+        </div>
+    </div>
+    <div id="notification" class="notification"></div>
+    <div id="colorAdjuster" class="color-adjuster">
+        <h3>Adjust Color</h3>
+        <div class="slider-container">
+            <label for="hueSlider">Hue:</label>
+            <input type="range" id="hueSlider" min="0" max="360" value="0">
+        </div>
+        <div class="slider-container">
+            <label for="saturationSlider">Saturation:</label>
+            <input type="range" id="saturationSlider" min="0" max="100" value="100">
+        </div>
+        <div class="slider-container">
+            <label for="lightnessSlider">Lightness:</label>
+            <input type="range" id="lightnessSlider" min="0" max="100" value="50">
         </div>
     </div>
     <script src="script.js"></script>
